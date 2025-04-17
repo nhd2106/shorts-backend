@@ -1,0 +1,13 @@
+/node_modules
+/venv
+/dist
+/bin
+
+/src/services/venv
+/contents
+/models
+
+
+*.DS_Store
+.env
+.env.*
