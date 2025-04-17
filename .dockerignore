@@ -6,7 +6,6 @@ dist
 .gitignore
 .env
 .DS_Store
-contents
 *.md
 Dockerfile*
 docker-compose* 

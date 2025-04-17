@@ -7,6 +7,7 @@
   "scripts": {
     "prepare": "cd src/services && ./setup_whisper.sh",
     "prepare:ubuntu": "cd src/services && ./setup_whisper_ubuntu.sh",
+    "prepare:skip": "echo 'Skipping whisper setup'",
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "tsc",

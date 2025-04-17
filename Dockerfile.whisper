@@ -28,8 +28,15 @@ RUN pip3 install --no-cache-dir --upgrade pip && \
 COPY src/services/whisper_transcribe.py ./whisper_transcribe.py
 RUN chmod +x ./whisper_transcribe.py
 
-# Create a directory where the app will store contents
-RUN mkdir -p /app/contents
+# Create contents directory and subdirectories
+RUN mkdir -p /app/contents/temp && \
+    mkdir -p /app/contents/video && \
+    mkdir -p /app/contents/audio && \
+    mkdir -p /app/contents/images && \
+    mkdir -p /app/contents/script && \
+    mkdir -p /app/contents/cache && \
+    mkdir -p /app/contents/thumbnail && \
+    chmod -R 755 /app/contents
 
 # Volume for content sharing
 VOLUME ["/app/contents"]

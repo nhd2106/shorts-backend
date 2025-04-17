@@ -14,6 +14,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - TOGETHER_API_KEY=${TOGETHER_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - NODE_ENV=production
     depends_on:
       - whisper
     restart: unless-stopped
@@ -31,6 +32,11 @@ services:
       - shorts-network
     environment:
       - WHISPER_CPU_ONLY=1
+
+# Create a named volume for persistent storage
+volumes:
+  contents:
+    driver: local
 
 networks:
   shorts-network:

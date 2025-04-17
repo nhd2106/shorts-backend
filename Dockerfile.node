@@ -7,17 +7,34 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
+# Copy package files first
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci
+# Copy source code and service files
+COPY src ./src
+COPY tsconfig.json ./
 
-# Copy source code
-COPY . .
+# Create contents directory and required subdirectories
+RUN mkdir -p ./contents/temp && \
+    mkdir -p ./contents/video && \
+    mkdir -p ./contents/audio && \
+    mkdir -p ./contents/images && \
+    mkdir -p ./contents/script && \
+    mkdir -p ./contents/cache && \
+    mkdir -p ./contents/thumbnail && \
+    chmod -R 755 ./contents
 
-# Build the application and setup whisper with Ubuntu script
-RUN npm run build && npm run prepare:ubuntu
+# Ensure the script is executable
+RUN chmod +x ./src/services/setup_whisper_ubuntu.sh
+
+# Install dependencies without running prepare script initially
+RUN npm ci --ignore-scripts
+
+# Build the application
+RUN npm run build
+
+# Now run the prepare script for Ubuntu
+RUN npm run prepare:ubuntu
 
 # Set environment variables
 ENV NODE_ENV=production
