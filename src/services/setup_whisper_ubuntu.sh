@@ -15,14 +15,11 @@ fi
 
 # Skip system checks if in Docker
 if [ "$SKIP_CHECKS" -eq 0 ]; then
-    # Check if Python 3.11 is installed
-    if ! command -v python3.11 &> /dev/null; then
-        echo "Python 3.11 is not installed. Installing Python 3.11..."
+    # Check if Python is installed
+    if ! command -v python3 &> /dev/null; then
+        echo "Python 3 is not installed. Installing Python 3..."
         sudo apt update
-        sudo apt install -y software-properties-common
-        sudo add-apt-repository -y ppa:deadsnakes/ppa
-        sudo apt update
-        sudo apt install -y python3.11 python3.11-venv python3.11-dev
+        sudo apt install -y python3 python3-venv python3-dev
     fi
 
     # Check if pip is installed
@@ -38,6 +35,9 @@ if [ "$SKIP_CHECKS" -eq 0 ]; then
     fi
 fi
 
+echo "Python version:"
+python3 --version
+
 echo "Installing Python dependencies..."
 
 # Create venv directory if it doesn't exist
@@ -50,26 +50,26 @@ if [ -d "$SCRIPT_DIR/venv/bin" ]; then
 fi
 
 # Check if venv module is available
-if ! python3.11 -m venv --help &> /dev/null; then
-    echo "The venv module is not available. Installing python3.11-venv..."
+if ! python3 -m venv --help &> /dev/null; then
+    echo "The venv module is not available. Installing python3-venv..."
     if [ -f /.dockerenv ]; then
-        apt-get update && apt-get install -y python3.11-venv
+        apt-get update && apt-get install -y python3-venv
     else
-        sudo apt-get update && sudo apt-get install -y python3.11-venv
+        sudo apt-get update && sudo apt-get install -y python3-venv
     fi
 fi
 
-# Create and activate virtual environment with Python 3.11
-echo "Creating virtual environment with Python 3.11..."
-python3.11 -m venv "$SCRIPT_DIR/venv" || { 
+# Create and activate virtual environment with Python 3
+echo "Creating virtual environment with Python 3..."
+python3 -m venv "$SCRIPT_DIR/venv" || { 
     echo "Failed to create virtual environment. Detailed error:"
-    python3.11 -m venv "$SCRIPT_DIR/venv" --verbose
+    python3 -m venv "$SCRIPT_DIR/venv" --verbose
     exit 1 
 }
 
 # Check if venv was created successfully
 if [ ! -f "$SCRIPT_DIR/venv/bin/activate" ]; then
-    echo "Virtual environment creation failed. Check Python 3.11 installation."
+    echo "Virtual environment creation failed. Check Python installation."
     exit 1
 fi
 
@@ -77,10 +77,14 @@ fi
 echo "Activating virtual environment..."
 source "$SCRIPT_DIR/venv/bin/activate" || { echo "Failed to activate virtual environment"; exit 1; }
 
+# Show Python version in venv
+echo "Python version in virtual environment:"
+python --version
+
 # Ensure the site-packages directory exists with correct permissions
-SITE_PACKAGES="$SCRIPT_DIR/venv/lib/python3.11/site-packages"
-mkdir -p "$SITE_PACKAGES"
-chmod 755 "$SITE_PACKAGES"
+SITE_PACKAGES="$SCRIPT_DIR/venv/lib/python3.*/site-packages"
+mkdir -p $SITE_PACKAGES
+chmod 755 $SITE_PACKAGES
 
 # Upgrade pip
 echo "Upgrading pip..."

@@ -9,9 +9,14 @@ def setup_environment():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Add virtual environment site-packages to Python path
-    venv_site_packages = os.path.join(script_dir, "venv", "lib", "python3.11", "site-packages")
-    if os.path.exists(venv_site_packages):
-        site.addsitedir(venv_site_packages)
+    # Look for any Python 3.x version in the venv directory
+    for py_ver in os.listdir(os.path.join(script_dir, "venv", "lib")):
+        if py_ver.startswith("python3"):
+            venv_site_packages = os.path.join(script_dir, "venv", "lib", py_ver, "site-packages")
+            if os.path.exists(venv_site_packages):
+                site.addsitedir(venv_site_packages)
+                print(f"Added {venv_site_packages} to Python path", file=sys.stderr)
+                break
 
 def transcribe_audio(audio_path, language="vi"):
     try:
