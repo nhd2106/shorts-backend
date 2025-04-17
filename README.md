@@ -8,8 +8,8 @@ This project can be deployed using Docker and Docker Compose, with support for b
 
 ### Prerequisites
 
-- Docker
-- Docker Compose
+- Docker Engine (version 17.09.0+)
+- Docker Compose (version 1.17.0+)
 
 ### Setup
 
@@ -48,6 +48,8 @@ This will start:
 
 - The main Node.js application at port 5123 (or your configured PORT)
 - The Whisper transcription service in CPU-only mode
+
+> **Note:** If you encounter version compatibility issues with Docker Compose, you may need to use `docker compose` (with a space) instead of `docker-compose` on newer Docker installations.
 
 #### With GPU Acceleration (Optional)
 
