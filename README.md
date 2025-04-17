@@ -2,9 +2,9 @@
 
 A Node.js application to generate YouTube shorts with AI-powered content creation and video processing.
 
-## Deployment with Docker
+## Deployment with Docker (Combined Container)
 
-This project can be deployed using Docker and Docker Compose, with support for both GPU and CPU-only environments.
+This project can be deployed using Docker and Docker Compose in a single combined container that includes both the Node.js application and the Whisper transcription service.
 
 ### Prerequisites
 
@@ -36,7 +36,7 @@ This project can be deployed using Docker and Docker Compose, with support for b
 
 ### Deployment
 
-#### CPU-Only Deployment (Default)
+#### Build and Run the Container
 
 Simply run:
 
@@ -44,52 +44,50 @@ Simply run:
 docker-compose up -d
 ```
 
-This will start:
+This will:
 
-- The main Node.js application at port 5123 (or your configured PORT)
-- The Whisper transcription service in CPU-only mode
+- Build a single container with both Node.js and Python/Whisper
+- Run the container and expose port 5123 (or your configured PORT)
+- Create a volume for the contents directory for data persistence
 
 > **Note:** If you encounter version compatibility issues with Docker Compose, you may need to use `docker compose` (with a space) instead of `docker-compose` on newer Docker installations.
 
-#### With GPU Acceleration (Optional)
+#### Testing Whisper Transcription
 
-If you have NVIDIA GPU hardware and want to enable GPU acceleration:
+To verify that the Whisper transcription functionality is working:
 
-1. Install NVIDIA Container Toolkit:
-
+1. Make sure you have an audio file for testing (e.g., test.mp3, sample.wav)
+2. Run the test script:
    ```bash
-   distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-   curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
-   curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-   sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
-   sudo systemctl restart docker
+   ./test-whisper.sh your-audio-file.mp3
    ```
 
-2. Edit the `docker-compose.yml` file and:
+This script will copy your audio file to the correct location and run the transcription within the container.
 
-   - Remove the `WHISPER_CPU_ONLY=1` environment variable
-   - Add the GPU configuration:
-
-   ```yaml
-   whisper:
-     # ... existing config ...
-     deploy:
-       resources:
-         reservations:
-           devices:
-             - driver: nvidia
-               count: 1
-               capabilities: [gpu]
-   ```
-
-3. Start the services:
-   ```bash
-   docker-compose up -d
-   ```
-
-### Access
+### Accessing Your Application
 
 The server will be accessible at `http://localhost:5123` (or your configured PORT).
+
+### Troubleshooting
+
+If you have any issues with the container:
+
+1. Check the logs:
+
+   ```bash
+   docker-compose logs
+   ```
+
+2. For more detailed logs with continuous monitoring:
+
+   ```bash
+   docker-compose logs -f
+   ```
+
+3. To access the container's shell for debugging:
+   ```bash
+   docker-compose exec app bash
+   ```
 
 ## Manual Setup
 

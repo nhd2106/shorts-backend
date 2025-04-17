@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.node
+      dockerfile: Dockerfile
     ports:
       - "${PORT:-5123}:${PORT:-5123}"
     volumes:
@@ -15,29 +15,9 @@ services:
       - TOGETHER_API_KEY=${TOGETHER_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
       - NODE_ENV=production
-    depends_on:
-      - whisper
-    restart: unless-stopped
-    networks:
-      - shorts-network
-
-  whisper:
-    build:
-      context: .
-      dockerfile: Dockerfile.whisper
-    volumes:
-      - ./contents:/app/contents
-    restart: unless-stopped
-    networks:
-      - shorts-network
-    environment:
       - WHISPER_CPU_ONLY=1
+    restart: unless-stopped
 
-# Create a named volume for persistent storage
 volumes:
   contents:
     driver: local
-
-networks:
-  shorts-network:
-    driver: bridge
