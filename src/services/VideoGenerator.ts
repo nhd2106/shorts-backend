@@ -45,90 +45,6 @@ export class VideoGenerator implements VideoGenerator {
   private duration: number | null;
   private defaultTempDir: string;
   private openaiClient: OpenAI | null;
-  private textEffects: TextEffect[] = [
-    {
-      name: "Pop-in Word by Word",
-      style: "bold",
-      animationParams: { scale: "1.2", fade: "0.3" },
-      fontColor: "white",
-      stroke: true,
-      strokeColor: "black",
-      backgroundColor: "black@0.5",
-      isBold: true,
-      fontSize: 52,
-    },
-    {
-      name: "Typewriter Effect",
-      style: "monospace",
-      animationParams: { typingSpeed: "0.1", cursor: true },
-      fontColor: "white",
-      backgroundColor: "black@0.7",
-      fontName: "Courier New",
-      isBold: true,
-      fontSize: 48,
-    },
-    {
-      name: "Bouncy Word Effect",
-      style: "rounded",
-      animationParams: { bounce: "0.2", drop: true },
-      fontColor: "white",
-      backgroundColor: "pink@0.4",
-    },
-    {
-      name: "Wave Motion",
-      style: "kinetic",
-      animationParams: { amplitude: "5", frequency: "2" },
-      fontColor: "#00FFFF",
-      stroke: true,
-      strokeColor: "#FF00FF",
-    },
-    {
-      name: "Glitchy Text",
-      style: "glitch",
-      animationParams: { flickerRate: "0.1", displacement: "3" },
-      fontColor: "#FF0000",
-      backgroundColor: "black@0.7",
-    },
-    {
-      name: "Sliding Subtitles",
-      style: "slide",
-      animationParams: { direction: "left", speed: "0.2" },
-      fontColor: "white",
-      stroke: true,
-      strokeColor: "black",
-    },
-    {
-      name: "Shake Effect",
-      style: "shake",
-      animationParams: { intensity: "2", randomness: "0.5" },
-      fontColor: "#FFFF00",
-      stroke: true,
-      strokeColor: "black",
-    },
-    {
-      name: "Expanding Words",
-      style: "expand",
-      animationParams: { startScale: "0.5", endScale: "1.2" },
-      fontColor: "white",
-      backgroundColor: "black@0.5",
-    },
-    {
-      name: "3D Rotation Effect",
-      style: "3d",
-      animationParams: { angle: "15", perspective: "100" },
-      fontColor: "#00FFFF",
-      stroke: true,
-      strokeColor: "#000080",
-    },
-    {
-      name: "Handwritten Scribble Text",
-      style: "handwritten",
-      animationParams: { revealSpeed: "0.1", jitter: "2" },
-      fontColor: "#333333",
-      backgroundColor: "white@0.3",
-      fontName: "Comic Sans MS",
-    },
-  ];
 
   constructor() {
     this.videoFormats = {
@@ -599,7 +515,7 @@ export class VideoGenerator implements VideoGenerator {
               console.log(`FFmpeg base command: ${cmdline}`);
             })
             .on("stderr", (stderrLine) => {
-              // console.log(`FFmpeg base stderr: ${stderrLine}`);
+              console.log(`FFmpeg base stderr: ${stderrLine}`);
             })
             .on("end", () => resolve())
             .on("error", (err) => {
@@ -1145,11 +1061,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     // For each time group, create a unified background and add individual text elements
     timeGroups.forEach((group) => {
       // Add a background element for the entire group
-      const groupStartTime = this.formatASSTime(group.start);
-      const groupEndTime = this.formatASSTime(group.end);
 
       // Add each text element
-      group.texts.forEach((textItem, index) => {
+      group.texts.forEach((textItem) => {
         // Apply styling with yellow text color
         const styleOverrides = "\\c&H0000FFFF&\\b1"; // Yellow color in ASS format
 
@@ -1166,17 +1080,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return;
   }
 
-  // Apply the specific effect to ASS subtitle based on effect type
-  private applyEffectToSubtitle(
-    text: string,
-    effect: TextEffect,
-    start: number,
-    duration: number
-  ): string {
-    // Return plain text without any effects
-    return text;
-  }
-
   // Helper method to format time for ASS format (h:mm:ss.cc)
   private formatASSTime(seconds: number): string {
     const h = Math.floor(seconds / 3600);
@@ -1187,31 +1090,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return `${h}:${m.toString().padStart(2, "0")}:${s
       .toString()
       .padStart(2, "0")}.${cs.toString().padStart(2, "0")}`;
-  }
-
-  // Helper method to convert regular color to ASS format
-  private convertColorToASSFormat(color: string): string {
-    // If it's already in ASS format, return as is
-    if (color.startsWith("&H")) {
-      return color;
-    }
-
-    // If it's a hex color like #RRGGBB
-    if (color.startsWith("#")) {
-      // ASS format is &HAABBGGRR (alpha, blue, green, red)
-      const r = color.substr(1, 2);
-      const g = color.substr(3, 2);
-      const b = color.substr(5, 2);
-      return `&H00${b}${g}${r}`;
-    }
-
-    // For named colors like "white", "yellow", just use a default format
-    if (color === "white") return "&H00FFFFFF";
-    if (color === "yellow") return "&H0000FFFF";
-    if (color === "black") return "&H00000000";
-
-    // Default
-    return "&H0000FFFF"; // Yellow as default
   }
 
   // Generate SRT subtitle format as a fallback
@@ -1381,105 +1259,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         command.run();
       } catch (error) {
         console.error("Error in drawtext method:", error);
-        reject(error);
-      }
-    });
-  }
-
-  // Helper method to add subtitles to a video
-  private addSubtitlesToVideo(
-    inputVideoPath: string,
-    outputVideoPath: string,
-    subtitleFilter: string
-  ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        console.log(`Adding subtitles to video with filter: ${subtitleFilter}`);
-
-        const command = ffmpeg()
-          .input(inputVideoPath)
-          .outputOptions([
-            "-vf",
-            subtitleFilter,
-            "-c:v",
-            "libx264",
-            "-preset",
-            "ultrafast",
-            "-crf",
-            "23",
-            "-c:a",
-            "copy",
-          ])
-          .output(outputVideoPath)
-          .on("start", (cmdline) => {
-            console.log(`FFmpeg subtitles command: ${cmdline}`);
-          })
-          .on("stderr", (stderrLine) => {
-            console.log(`FFmpeg subtitles stderr: ${stderrLine}`);
-          })
-          .on("end", () => {
-            console.log(
-              `Successfully added subtitles to video: ${outputVideoPath}`
-            );
-            resolve();
-          })
-          .on("error", (err) => {
-            console.error("FFmpeg subtitles error:", err);
-            reject(err);
-          });
-
-        command.run();
-      } catch (error) {
-        console.error("Error in addSubtitlesToVideo:", error);
-        reject(error);
-      }
-    });
-  }
-
-  // Helper method to merge voiceover with background video
-  private mergeVoiceoverWithVideo(
-    voiceoverPath: string,
-    videoPath: string,
-    outputPath: string
-  ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        console.log(
-          `Merging voiceover ${voiceoverPath} with video ${videoPath}`
-        );
-
-        const command = ffmpeg()
-          .input(videoPath)
-          .input(voiceoverPath)
-          .outputOptions([
-            "-map",
-            "0:v", // Use video from first input
-            "-map",
-            "1:a", // Use audio from second input
-            "-c:v",
-            "copy",
-            "-c:a",
-            "aac",
-            "-shortest",
-          ])
-          .output(outputPath)
-          .on("start", (cmdline) => {
-            console.log(`FFmpeg merge command: ${cmdline}`);
-          })
-          .on("end", () => {
-            console.log(
-              `Successfully merged voiceover with video: ${outputPath}`
-            );
-            resolve();
-          })
-          .on("error", (err) => {
-            console.error("FFmpeg merge error:", err);
-            reject(err);
-          });
-
-        command.run();
-      } catch (error) {
-        console.error("Error in mergeVoiceoverWithVideo:", error);
         reject(error);
       }
     });
