@@ -49,9 +49,23 @@ if [ -d "$SCRIPT_DIR/venv/bin" ]; then
     rm -rf "$SCRIPT_DIR/venv"
 fi
 
+# Check if venv module is available
+if ! python3.11 -m venv --help &> /dev/null; then
+    echo "The venv module is not available. Installing python3.11-venv..."
+    if [ -f /.dockerenv ]; then
+        apt-get update && apt-get install -y python3.11-venv
+    else
+        sudo apt-get update && sudo apt-get install -y python3.11-venv
+    fi
+fi
+
 # Create and activate virtual environment with Python 3.11
 echo "Creating virtual environment with Python 3.11..."
-python3.11 -m venv "$SCRIPT_DIR/venv" || { echo "Failed to create virtual environment"; exit 1; }
+python3.11 -m venv "$SCRIPT_DIR/venv" || { 
+    echo "Failed to create virtual environment. Detailed error:"
+    python3.11 -m venv "$SCRIPT_DIR/venv" --verbose
+    exit 1 
+}
 
 # Check if venv was created successfully
 if [ ! -f "$SCRIPT_DIR/venv/bin/activate" ]; then

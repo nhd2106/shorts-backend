@@ -2,15 +2,23 @@ FROM ubuntu:22.04
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install system dependencies with proper Python setup
+RUN apt-get update && \
+    apt-get install -y software-properties-common curl gnupg && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
     python3.11 \
     python3.11-venv \
     python3.11-dev \
+    python3.11-distutils \
     python3-pip \
     ffmpeg \
-    software-properties-common \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11 \
     && rm -rf /var/lib/apt/lists/*
+
+# Verify Python and venv installation
+RUN python3.11 --version && python3.11 -m venv --help
 
 # Copy Python requirements
 COPY src/services/requirements.txt ./requirements.txt
@@ -40,6 +48,9 @@ RUN mkdir -p /app/contents/temp && \
 
 # Volume for content sharing
 VOLUME ["/app/contents"]
+
+# Environment variable for CPU-only mode
+ENV WHISPER_CPU_ONLY=1
 
 # Keep container running to serve requests
 CMD ["tail", "-f", "/dev/null"] 

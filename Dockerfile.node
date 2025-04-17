@@ -2,10 +2,23 @@ FROM node:18-slim
 
 WORKDIR /app
 
-# Install dependencies required by ffmpeg 
+# Install dependencies required by ffmpeg and Python 3.11 with venv
 RUN apt-get update && apt-get install -y \
     ffmpeg \
+    software-properties-common \
+    curl \
+    gnupg \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Verify Python installation
+RUN python3.11 --version && python3.11 -m venv --help
 
 # Copy package files first
 COPY package.json package-lock.json ./
