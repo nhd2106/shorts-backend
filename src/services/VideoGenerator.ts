@@ -1497,7 +1497,7 @@ Create prompts for image generation that are:
 4. Include lighting and atmosphere descriptions
 5. Keep each prompt under 500 characters
 6. Focus on visual elements that support the script
-
+7. don't create NSFW prompts
 Example good prompts:
 "Low angle shot of city skyline, golden hour lighting, lens flare, dramatic clouds"
 "Close up portrait, shallow depth of field, natural window lighting, office setting"
