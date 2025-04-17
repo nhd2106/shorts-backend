@@ -43,22 +43,21 @@ RUN cd ./src/services && \
     pip install -r requirements.txt && \
     chmod +x whisper_transcribe.py
 
-# Environment variable for CPU-only Whisper
-ENV WHISPER_CPU_ONLY=1
-
 # Install Node.js dependencies without running prepare script (we've already set up Whisper)
 RUN npm ci --ignore-scripts
 
 # Build the Node.js application
 RUN npm run build
 
-# Set environment variables
+# Set environment variables with defaults
 ENV NODE_ENV=production
+ENV WHISPER_CPU_ONLY=1
+ENV PORT=5123
 
 # Expose the port
-EXPOSE ${PORT:-5123}
+EXPOSE ${PORT}
 
-# Setup supervisor to run both Node.js app and keep the container running
+# Setup supervisor to run the Node.js app
 RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/*
 
 # Create supervisor config
