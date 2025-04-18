@@ -1277,21 +1277,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
       const scriptPath = path.join(__dirname, "whisper_transcribe.py");
       const venvPath = path.join(__dirname, "venv");
       const venvPythonPath = path.join(venvPath, "bin", "python3");
-
-      // We don't need to specify the exact site-packages path
-      // The whisper_transcribe.py script handles this internally
-      console.log("Script path:", scriptPath);
-      // Check if Python script exists
-      if (!fs.existsSync(scriptPath)) {
-        console.warn(
-          "Whisper transcription script not found, returning empty transcript"
-        );
-        return {
-          text: "",
-          segments: [],
-        };
-      }
-
+      console.log(venvPythonPath, "venvPythonPath");
       // Check if virtual environment exists
       if (!fs.existsSync(venvPythonPath)) {
         console.warn(
