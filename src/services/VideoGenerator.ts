@@ -1277,19 +1277,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
       const scriptPath = path.join(__dirname, "whisper_transcribe.py");
       const venvPath = path.join(__dirname, "venv");
       const venvPythonPath = path.join(venvPath, "bin", "python3");
-      console.log(venvPythonPath, "venvPythonPath");
-      // Check if virtual environment exists
-      if (!fs.existsSync(venvPythonPath)) {
-        console.warn(
-          "Python virtual environment not found, returning empty transcript"
-        );
-        return {
-          text: "",
-          segments: [],
-        };
-      }
+      // console.log("Checking venvPythonPath:", venvPythonPath); // <-- Add this line
+      // if (!fs.existsSync(venvPythonPath)) {
+      //   console.warn(
+      //     `Virtual environment Python executable not found at ${venvPythonPath}. Cannot proceed with video generation.`
+      //   );
+      //   throw new Error("Python executable not found in virtual environment.");
+      // }
 
-      console.log(`Transcribing audio file: ${audioPath}`);
+      // console.log(`Transcribing audio file: ${audioPath}`);
 
       // Run Python script using the virtual environment
       return new Promise((resolve) => {
