@@ -1274,18 +1274,94 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
       }
 
       // Path to the Python script and virtual environment
-      const scriptPath = path.join(__dirname, "whisper_transcribe.py");
-      const venvPath = path.join(__dirname, "venv");
-      const venvPythonPath = path.join(venvPath, "bin", "python3");
-      // console.log("Checking venvPythonPath:", venvPythonPath); // <-- Add this line
-      // if (!fs.existsSync(venvPythonPath)) {
-      //   console.warn(
-      //     `Virtual environment Python executable not found at ${venvPythonPath}. Cannot proceed with video generation.`
-      //   );
-      //   throw new Error("Python executable not found in virtual environment.");
-      // }
+      const baseDir = process.cwd(); // Get the project root directory
+      console.log("Current working directory:", baseDir);
 
-      // console.log(`Transcribing audio file: ${audioPath}`);
+      const scriptPath = path.join(
+        baseDir,
+        "src",
+        "services",
+        "whisper_transcribe.py"
+      );
+      console.log("scriptPath:", scriptPath);
+
+      // Check if the script directory exists
+      const scriptDir = path.dirname(scriptPath);
+      console.log("Script directory:", scriptDir);
+      console.log("Script directory exists:", fs.existsSync(scriptDir));
+
+      if (!fs.existsSync(scriptPath)) {
+        // List contents of the script directory to debug
+        try {
+          const dirContents = fs.readdirSync(scriptDir);
+          console.log("Directory contents:", dirContents);
+        } catch (e) {
+          console.error("Cannot read script directory:", e);
+        }
+
+        throw new Error(`Script not found at path: ${scriptPath}`);
+      }
+
+      const venvPath = path.join(baseDir, "src", "services", "venv");
+      console.log("venvPath:", venvPath);
+      console.log("venv directory exists:", fs.existsSync(venvPath));
+
+      let venvPythonPath = path.join(venvPath, "bin", "python3");
+      console.log("Checking venvPythonPath:", venvPythonPath);
+
+      // Check if venv bin directory exists
+      const venvBinDir = path.join(venvPath, "bin");
+      console.log("venv bin directory:", venvBinDir);
+      console.log("venv bin directory exists:", fs.existsSync(venvBinDir));
+
+      if (fs.existsSync(venvBinDir)) {
+        try {
+          const binContents = fs.readdirSync(venvBinDir);
+          console.log("venv bin contents:", binContents);
+        } catch (e) {
+          console.error("Cannot read venv bin directory:", e);
+        }
+      }
+
+      if (!fs.existsSync(venvPythonPath)) {
+        console.warn(
+          `Virtual environment Python executable not found at ${venvPythonPath}. Trying system Python as fallback.`
+        );
+
+        // Try system Python paths as fallback
+        const possiblePythonPaths = [
+          "/usr/bin/python3",
+          "/usr/local/bin/python3",
+          "/bin/python3",
+          "python3", // Use PATH resolution
+        ];
+
+        let foundPython = false;
+        for (const pythonPath of possiblePythonPaths) {
+          // For absolute paths, check if they exist
+          if (pythonPath.startsWith("/") && fs.existsSync(pythonPath)) {
+            console.log(`Found system Python at: ${pythonPath}`);
+            venvPythonPath = pythonPath;
+            foundPython = true;
+            break;
+          }
+          // For non-absolute paths, we'll trust PATH resolution during spawn
+          else if (!pythonPath.startsWith("/")) {
+            console.log(`Using system Python on PATH: ${pythonPath}`);
+            venvPythonPath = pythonPath;
+            foundPython = true;
+            break;
+          }
+        }
+
+        if (!foundPython) {
+          throw new Error(
+            "Python executable not found in virtual environment or system."
+          );
+        }
+      }
+
+      console.log(`Transcribing audio file: ${audioPath}`);
 
       // Run Python script using the virtual environment
       return new Promise((resolve) => {
