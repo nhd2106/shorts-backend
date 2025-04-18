@@ -47,14 +47,15 @@ def transcribe_audio(audio_path, language="vi"):
         print(f"Using device: {device}", file=sys.stderr)
         
         # Load the Whisper model
-        model = whisper.load_model("base", device=device)
+        model = whisper.load_model("small", device=device)
         
         # Transcribe with word-level timestamps
         result = model.transcribe(
             audio_path,
             language=language,
             word_timestamps=True,
-            verbose=False
+            verbose=False,
+            fp16=False
         )
         
         # Convert segments to our desired format
